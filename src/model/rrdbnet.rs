@@ -1,10 +1,9 @@
 use burn::prelude::*;
 use burn::nn::{
         conv::{Conv2d, Conv2dConfig},
-        interpolate::{Interpolate2dConfig, InterpolateMode::Linear},
+        interpolate::{Interpolate2dConfig, InterpolateMode::Nearest},
         LeakyRelu, LeakyReluConfig, PaddingConfig2d,
     };
-
 
 #[derive(Module, Debug)]
 pub struct ResidualDenseBlock<B: Backend> {
@@ -32,7 +31,7 @@ impl<B: Backend> ResidualDenseBlock<B> {
         let x2 = self.lrelu.forward(self.conv2.forward(Tensor::cat(vec![x.clone(), x1.clone()], 1)));
         let x3 = self.lrelu.forward(self.conv3.forward(Tensor::cat(vec![x.clone(), x1.clone(), x2.clone()], 1)));
         let x4 = self.lrelu.forward(self.conv4.forward(Tensor::cat(vec![x.clone(), x1.clone(), x2.clone(), x3.clone()], 1)));
-        let x5 = self.lrelu.forward(self.conv5.forward(Tensor::cat(vec![x.clone(), x1, x2, x3, x4], 1)));
+        let x5 = self.conv5.forward(Tensor::cat(vec![x.clone(), x1, x2, x3, x4], 1));
 
         x5.mul_scalar(0.2) + x
     }
@@ -115,7 +114,7 @@ impl<B: Backend> RRDBNet<B> {
         let feat = feat + body_feat;
 
         // Upsample
-        let interpolator = Interpolate2dConfig::new().with_scale_factor(Some([2., 2.])).with_mode(Linear).init();
+        let interpolator = Interpolate2dConfig::new().with_scale_factor(Some([2., 2.])).with_mode(Nearest).init();
         let feat = self.lrelu.forward(self.conv_up1.forward(interpolator.forward(feat)));
         let feat = self.lrelu.forward(self.conv_up2.forward(interpolator.forward(feat)));
         let out = self.conv_last.forward(self.lrelu.forward(self.conv_hr.forward(feat)));

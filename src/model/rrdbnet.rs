@@ -1,11 +1,9 @@
 use burn::prelude::*;
-use burn::{
-    nn::{
+use burn::nn::{
         conv::{Conv2d, Conv2dConfig},
-        interpolate::{Interpolate2d, Interpolate2dConfig, InterpolateMode::Linear},
+        interpolate::{Interpolate2dConfig, InterpolateMode::Linear},
         LeakyRelu, LeakyReluConfig, PaddingConfig2d,
-    }
-};
+    };
 
 
 #[derive(Module, Debug)]

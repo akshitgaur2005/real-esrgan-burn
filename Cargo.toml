@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0.97"
-burn = { git = "https://github.com/tracel-ai/burn.git", version = "0.17.0", features = ["vision", "wgpu"] }
-burn-import = "0.16.1"
 image = { version = "0.25.6", features = ["jpeg", "png"] }
+burn = { git = "https://github.com/tracel-ai/burn", branch = "main", features = ["vision", "wgpu"] }
+burn-import = { git = "https://github.com/tracel-ai/burn", branch = "main" }
+burn-ndarray = { git = "https://github.com/tracel-ai/burn", branch = "main" }

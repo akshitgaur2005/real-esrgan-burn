@@ -7,7 +7,7 @@ use burn::nn::{
 
 #[derive(Module, Debug)]
 pub struct ResidualDenseBlock<B: Backend> {
-    conv1: Conv2d<B>,
+    pub conv1: Conv2d<B>,
     conv2: Conv2d<B>,
     conv3: Conv2d<B>,
     conv4: Conv2d<B>,
@@ -26,8 +26,6 @@ impl<B: Backend> ResidualDenseBlock<B> {
     //    Tensor<B, 4>: Output tensor with shape [batch_size, num_feat, height, width]
     pub fn forward(&self, x: Tensor<B, 4>) -> Tensor<B, 4> {
         let x1 = self.lrelu.forward(self.conv1.forward(x.clone()));
-
-        // let cat_x_x1 = Tensor::cat(vec![x.clone(), x1.clone()], 1);
         let x2 = self.lrelu.forward(self.conv2.forward(Tensor::cat(vec![x.clone(), x1.clone()], 1)));
         let x3 = self.lrelu.forward(self.conv3.forward(Tensor::cat(vec![x.clone(), x1.clone(), x2.clone()], 1)));
         let x4 = self.lrelu.forward(self.conv4.forward(Tensor::cat(vec![x.clone(), x1.clone(), x2.clone(), x3.clone()], 1)));
@@ -59,7 +57,7 @@ impl ResidualDenseBlockConfig {
 
 #[derive(Module, Debug)]
 pub struct RRDB<B: Backend> {
-    rdb1: ResidualDenseBlock<B>,
+    pub rdb1: ResidualDenseBlock<B>,
     rdb2: ResidualDenseBlock<B>,
     rdb3: ResidualDenseBlock<B>,
 }
@@ -93,7 +91,7 @@ impl RRDBConfig {
 #[derive(Module, Debug)]
 pub struct RRDBNet<B: Backend> {
     conv_first: Conv2d<B>,
-    body: Vec<RRDB<B>>,
+    pub body: Vec<RRDB<B>>,
     conv_body: Conv2d<B>,
     conv_up1: Conv2d<B>,
     conv_up2: Conv2d<B>,

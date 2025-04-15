@@ -1532,17 +1532,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "esrgan"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "burn",
- "burn-import",
- "burn-ndarray",
- "image",
-]
-
-[[package]]
 name = "event-listener"
 version = "5.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3913,6 +3902,17 @@ checksum = "1465873a3dfdaa8ae7cb14b4383657caab0b3e8a0aa9ae8e04b044854c8dfce2"
 dependencies = [
  "crossbeam-deque",
  "crossbeam-utils",
+]
+
+[[package]]
+name = "real-esrgan"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "burn",
+ "burn-import",
+ "burn-ndarray",
+ "image",
 ]
 
 [[package]]

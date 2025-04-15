@@ -1,13 +1,11 @@
 [package]
-name = "esrgan"
+name = "real-esrgan"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
 anyhow = "1.0.97"
 image = { version = "0.25.6", features = ["jpeg", "png"] }
-burn = { git = "https://github.com/tracel-ai/burn", branch = "main", features = ["vision", "wgpu", "ndarray", "cuda"] }
+burn = { git = "https://github.com/tracel-ai/burn", branch = "main", features = ["vision", "wgpu", "ndarray", "cuda", "tch"] }
 burn-import = { git = "https://github.com/tracel-ai/burn", branch = "main" }
 burn-ndarray = { git = "https://github.com/tracel-ai/burn", branch = "main" }
-
-#![recursion_limit = "256"]

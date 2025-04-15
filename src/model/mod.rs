@@ -7,7 +7,7 @@ use crate::RRDBNet;
 
 #[derive(Module, Debug)]
 pub struct RealESRGAN<B: Backend> {
-    model: RRDBNet<B>
+    pub model: RRDBNet<B>
 }
 
 impl<B: Backend> RealESRGAN<B> {

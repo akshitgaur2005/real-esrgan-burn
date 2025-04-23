@@ -3059,6 +3059,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "model"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "burn",
+ "burn-import",
+ "burn-ndarray",
+ "image",
+]
+
+[[package]]
 name = "naga"
 version = "25.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3968,6 +3979,7 @@ dependencies = [
  "burn-import",
  "burn-ndarray",
  "image",
+ "model",
 ]
 
 [[package]]

@@ -271,8 +271,105 @@ pub fn unpad_image<B: Backend>(image: Tensor<B, 3>, pad_size: usize) -> Tensor<B
     ])
 }
 
-/// Loads an image from a file path and converts it into a Tensor<B, 4>.
-/// The tensor will have shape [1, Channels, Height, Width] and float values in [0, 1].
+/// Loads an image from a file path and converts it into a Tensor<B, 3>.
+/// The tensor will have shape [Channels, Height, Width].
+/// Supports image formats supported by the 'image' crate (PNG, JPEG, etc. with enabled features).
+/// Converts input to RGB if it's not already (discards alpha if present).
+///
+/// Args:
+///     path: The path to the image file.
+///     device: The Burn device to create the tensor on.
+///
+/// Returns:
+///     A Result containing the loaded tensor or an error.
+pub fn load_image_to_tensor<B: Backend, P: AsRef<Path>>(
+    path: P,
+    device: &B::Device,
+) -> Result<Tensor<B, 3>, Box<dyn Error>> {
+    // Open and decode the image file
+    let img = ImageReader::open(path)?.decode()?;
+
+    // Convert to RGB8 format (3 channels, 8 bits per channel)
+    // This handles different input formats (grayscale, rgba) and converts to RGB.
+    // The raw pixel data from rgb_img.into_raw() is in HWC order.
+    let rgb_img = img.to_rgb8();
+    let (width, height) = rgb_img.dimensions();
+    let channels = 3; // RGB always has 3 channels
+
+    let raw_pixels: Vec<u8> = rgb_img.into_raw();
+
+    // Create a Tensor from the HWC data
+    // The shape provided to from_data defines how the flattened data is interpreted.
+    let tensor_hwc = Tensor::<B, 3>::from_data(
+        TensorData::new(
+            raw_pixels
+                .into_iter()
+                .map(|p| (p as f32).elem::<u8>())
+                .collect(),
+            Shape::new([height as usize, width as usize, channels]), // Data is currently HWC
+        ),
+        device,
+    );
+
+    // Permute the tensor from HWC [H, W, C] to CHW [C, H, W]
+    let tensor_chw = tensor_hwc.permute([2, 0, 1]); // Swap dimensions: 0 (H) with 2 (C), and 1 (W) stays
+
+    Ok(tensor_chw)
+}
+
+/// Saves a Tensor<B, 3> to an image file.
+/// Assumes the tensor has shape [Channels, Height, Width].
+/// Supports saving in PNG format (or others with enabled features).
+///
+/// Args:
+///     tensor: The tensor to save.
+///     path: The path to save the image file to.
+///
+/// Returns:
+///     A Result indicating success or an error.
+pub fn save_tensor_to_image<B: Backend, P: AsRef<Path>>(
+    tensor: &Tensor<B, 3>,
+    path: P,
+) -> Result<(), Box<dyn Error>> {
+    let [channels, height, width] = tensor.dims();
+
+    if channels != 3 {
+        return Err(Box::<dyn Error>::from(
+            "Tensor must have 3 channels for saving as an RGB image",
+        ));
+    }
+
+    // Permute the tensor from CHW [C, H, W] to HWC [H, W, C]
+    let tensor_hwc = tensor.clone().permute([1, 2, 0]); // Swap dimensions: 0 (C) with 1 (H), and 2 (W) stays
+
+    // clamp(0.0, 255.0) is important before casting to u8 to avoid overflow/underflow
+    // Then convert to u8 and extract the raw data in HWC order
+    let tensor_u8_data_hwc: Vec<f32> = tensor_hwc
+        .clamp(0.0, 255.0) // Ensure values are in the valid range [0, 255]
+        .into_data() // Move data to CPU Data struct
+        .convert::<f32>()
+        .into_vec()
+        .expect("Should have become a vec!"); // Get raw Vec<u8> (now in HWC order)
+
+    println!("Converted to f32");
+    let data: Vec<u8> = tensor_u8_data_hwc
+        .into_iter()
+        .map(|p| p as u8)
+        .collect();
+    // Create an RgbImage buffer from the HWC data
+    let img: RgbImage =
+        ImageBuffer::from_raw(width as u32, height as u32, data).ok_or_else(|| {
+            Box::<dyn Error>::from("Failed to create RgbImage buffer from tensor data")
+        })?;
+
+    // Save the image
+    img.save_with_format(path, ImageFormat::Png)?; // Save as PNG
+
+    Ok(())
+}
+/*
+/// Loads an image from a file path and converts it into a Tensor<B, 3>.
+/// The tensor will have shape [Channels, Height, Width]
 /// Supports image formats supported by the 'image' crate (PNG, JPEG, etc. with enabled features).
 /// Converts input to RGB if it's not already (discards alpha if present).
 ///
@@ -298,8 +395,8 @@ pub fn load_image_to_tensor<B: Backend, P: AsRef<Path>>(
     // Get the raw pixel bytes (HWC order by default from image crate)
     let raw_pixels: Vec<u8> = rgb_img.into_raw();
 
-    // Convert u8 pixel values [0, 255] to float [0, 1] and reorder to CHW
-    /*
+    // Reorder to CHW
+
     let mut data_chw: Vec<B::FloatElem> = Vec::with_capacity(height as usize * width as usize * channels);
     for c in 0..channels {
         for h in 0..height as usize {
@@ -307,36 +404,27 @@ pub fn load_image_to_tensor<B: Backend, P: AsRef<Path>>(
                 // Calculate index in the HWC raw_pixels buffer
                 let hwc_idx = h * (width as usize * channels) + w * channels + c;
                 let pixel_value_u8 = raw_pixels[hwc_idx];
-                // Convert u8 [0, 255] to float [0.0, 1.0] and convert to backend float type
                 data_chw.push((pixel_value_u8 as f32).elem());
             }
         }
     }
 
 
-    // Create a Tensor<B, 3> [Channels, Height, Width] first
+    // Create a Tensor<B, 3> [Channels, Height, Width]
     let tensor_3d = Tensor::<B, 3>::from_data(
         TensorData::new(data_chw, Shape::new([channels, height as usize, width as usize])),
         device,
     );
-     */
-
-    let tensor_3d = Tensor::<B, 3>::from_data(
-        TensorData::new(raw_pixels, Shape::new([height as usize, width as usize, channels])), &device);
-    println!("Shape before permuting: {:?}", tensor_3d.dims());
-    let tensor_3d = tensor_3d.permute([2, 0, 1]);
-    println!("Shape after permuting: {:?}", tensor_3d.dims());
 
     Ok(tensor_3d)
 }
 
-/// Saves a Tensor<B, 4> to an image file.
-/// Assumes the tensor has shape [1, Channels, Height, Width] and float values in [0, 1].
+/// Saves a Tensor<B, 3> to an image file.
+/// Assumes the tensor has shape [Channels, Height, Width].
 /// Supports saving in PNG format (or others with enabled features).
-/// Handles 1-channel (grayscale) and 3-channel (RGB) tensors.
 ///
 /// Args:
-///     tensor: The tensor to save. Must have batch size 1.
+///     tensor: The tensor to save.
 ///     path: The path to save the image file to.
 ///
 /// Returns:
@@ -347,16 +435,29 @@ pub fn save_tensor_to_image<B: Backend, P: AsRef<Path>>(
 ) -> Result<(), Box<dyn Error>> {
     let [channels, height, width] = tensor.dims();
 
-    // Un-normalize float [0, 1] to float [0, 255], convert to u8 [0, 255], and get raw data
     // clamp(0.0, 255.0) is important before casting to u8 to avoid overflow/underflow
-    let data_hwc: Vec<u8> = tensor
+    let tensor_u8_data_nchw: Vec<u8> = tensor
         .clone() // Clone to avoid consuming the input tensor if needed elsewhere
-        .permute([2, 0, 1])
         .into_data() // Move data to CPU Data struct
         .convert::<u8>() // Convert data type to u8
         .into_vec()
         .expect("Should have become a vec!"); // Get raw Vec<u8> (data is typically NCHW flattened from Burn)
 
+    // Reorder data from NCHW (Burn's flatten order) to HWC (image crate buffer order)
+    let mut data_hwc: Vec<u8> = Vec::with_capacity(tensor_u8_data_nchw.len());
+    let img_size = height * width;
+
+    if channels == 3 {
+        // RGB image
+        for h in 0..height {
+            for w in 0..width {
+                for c in 0..channels {
+                    // Index in NCHW data: c * H*W + h * W + w (batch_size is 1)
+                    let nchw_idx = c * img_size + h * width + w;
+                    data_hwc.push(tensor_u8_data_nchw[nchw_idx]);
+                }
+            }
+        }
         // Create an RgbImage buffer from the HWC data
         let img: RgbImage = ImageBuffer::from_raw(width as u32, height as u32, data_hwc)
             .ok_or_else(|| Box::<dyn Error>::from("Failed to create RgbImage buffer from tensor data"))?;
@@ -364,8 +465,10 @@ pub fn save_tensor_to_image<B: Backend, P: AsRef<Path>>(
         // Save the image
         img.save_with_format(path, ImageFormat::Png)?; // Save as PNG
 
+    }
     Ok(())
 }
+*/
 
 // Tests
 #[cfg(test)]

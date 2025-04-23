@@ -9,7 +9,6 @@ use burn::{
     tensor::{f16, Shape, Tensor}
 };
 use burn::prelude::*;
-use burn_import::pytorch::{LoadArgs, PyTorchFileRecorder};
 use model::RealESRGANConfig;
 use model::utils::{load_image_to_tensor, save_tensor_to_image};
 
@@ -58,7 +57,7 @@ fn main() {
         PAD_SIZE,
         &device);
     println!("Output shape: {:?}", output_tensor.shape());
-    //println!("Output data: {}", output_tensor);
+    println!("Output data: {}", output_tensor);
     let _ = save_tensor_to_image(&output_tensor, "./samples/upscaled-cat.jpg");
     println!("Inference done.");
 }

@@ -2,6 +2,7 @@
 
 use burn::{
     backend::{libtorch::LibTorchDevice,
+              cuda::{Cuda, CudaDevice},
               wgpu::{flex32, WgpuDevice},
               LibTorch, Vulkan, Wgpu},
     module::Module,
@@ -13,18 +14,17 @@ use model::RealESRGANConfig;
 use model::utils::{load_image_to_tensor, save_tensor_to_image};
 
 //type Back = Wgpu<f32, i32>;
-type Back = LibTorch<f16>;
-//type Back = Vulkan<flex32, i32>;
+type Back = LibTorch<f32>;
+//type Back = Vulkan<f16, i32>;
 
-const BATCH_SIZE: usize = 2;
-const PATCH_SIZE: usize = 128;
+const BATCH_SIZE: usize = 1;
+const PATCH_SIZE: usize = 64;
 const PADDING: usize = 16;
 const PAD_SIZE: usize = 2;
 
 fn main() {
     //let device = WgpuDevice::DiscreteGpu(0);
     let device = LibTorchDevice::Cuda(0);
-
 
     println!("Using device: {:?}", device);
 

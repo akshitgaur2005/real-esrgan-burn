@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Image Upscaling (RealESRGAN)</title>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/wasm-feature-detect@1.5.1/dist/umd/index.min.js"
+      integrity="sha256-9+AQR2dApXE+f/D998vy0RATN/o4++mqVjAZ3lo432g="
+      crossorigin="anonymous"
+    ></script>
+
+    <script type="module" src="./index.js"></script> <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/normalize.min.css@8.0.1/normalize.min.css"
+      integrity="sha256-oeib74n7OcB5VoyaI+aGxJKkNEdyxYjd2m3fi/3gKls="
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>RealESRGAN Image Upscaling</h1>
+
+      <div class="selections">
+        <div class="select-box">
+          1. <label for="backend">Backend:</label>
+          <select id="backend">
+            <option value="ndarray" selected>CPU - Ndarray (f32)</option>
+            <option value="webgpu_f32">GPU - Vulkan (f32)</option>
+             <option value="webgpu_f16">GPU - Vulkan (f16)</option>
+            </select>
+        </div>
+      </div>
+
+      <div class="selections">
+        <div class="select-box">
+          2. Select Image:
+          <select id="imageDropdown">
+            <option value="" selected disabled>Select Preset</option>
+            <option value="samples/bridge.jpg">Bridge</option>
+            <option value="samples/cat.jpg">Cat</option>
+            <option value="samples/coyote.jpg">Coyote</option>
+            <option value="samples/flamingo.jpg">Flamingo</option>
+            <option value="samples/pelican.jpg">Pelican</option>
+            <option value="samples/table-lamp.jpg">Table Lamp</option>
+            <option value="samples/torch.jpg">Torch</option>
+          </select>
+          or Upload:
+          <input type="file" id="fileInput" accept="image/*" />
+        </div>
+      </div>
+
+      <div id="status">Select backend and image to start...</div>
+      <div id="time">&nbsp;</div>
+
+      <div class="canvas-container">
+        <div class="canvas-box">
+          <h3>Input Image</h3>
+          <canvas id="inputCanvas" width="224" height="224"></canvas>
+          <div id="inputDimensions"></div>
+        </div>
+
+        <div class="canvas-box">
+           <h3>Output Image (4x)</h3>
+           <canvas id="outputCanvas" width="896" height="896"></canvas> <div id="outputDimensions"></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="clearButton">Clear</button>
+      </div>
+    </div>
+
+  </body>
+</html>

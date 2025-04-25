@@ -1,20 +1,19 @@
 #![recursion_limit = "256"]
 
 use burn::{
-    backend::{libtorch::LibTorchDevice,
-              cuda::{Cuda, CudaDevice},
+    backend::{
               wgpu::{flex32, WgpuDevice},
-              LibTorch, Vulkan, Wgpu},
+        //      Vulkan,
+        Wgpu},
     module::Module,
     record::{FullPrecisionSettings, Recorder, NamedMpkFileRecorder},
-    tensor::{f16, Shape, Tensor}
+    tensor::{f16, Tensor}
 };
-use burn::prelude::*;
 use model::RealESRGANConfig;
 use model::utils::{load_image_to_tensor, save_tensor_to_image};
 
-//type Back = Wgpu<f32, i32>;
-type Back = LibTorch<f32>;
+type Back = Wgpu<f16, i32>;
+//type Back = LibTorch<f32>;
 //type Back = Vulkan<f16, i32>;
 
 const BATCH_SIZE: usize = 1;
@@ -23,8 +22,8 @@ const PADDING: usize = 16;
 const PAD_SIZE: usize = 2;
 
 fn main() {
-    //let device = WgpuDevice::DiscreteGpu(0);
-    let device = LibTorchDevice::Cuda(0);
+    let device = WgpuDevice::DiscreteGpu(0);
+    //let device = LibTorchDevice::Cuda(0);
 
     println!("Using device: {:?}", device);
 

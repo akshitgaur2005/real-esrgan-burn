@@ -1,0 +1,111 @@
+body {
+  font-family: sans-serif;
+  padding: 1em;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px; /* Increased max-width for side-by-side canvases */
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center content */
+}
+
+h1, h3 {
+    text-align: center;
+}
+
+.selections {
+  display: flex;
+  justify-content: center; /* Center selection boxes */
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.select-box {
+  margin: 5px 15px; /* Add some spacing between selection items */
+}
+
+label {
+    margin-right: 5px;
+}
+
+select, input[type="file"], button {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin: 0 5px;
+}
+
+button {
+    cursor: pointer;
+    background-color: #eee;
+}
+button:hover {
+    background-color: #ddd;
+}
+
+
+#status {
+  margin-top: 10px;
+  font-style: italic;
+  color: #555;
+  text-align: center;
+}
+
+#time {
+  text-align: center;
+  white-space: nowrap;
+  padding: 10px;
+  min-height: 1.2em; /* Prevent layout shift */
+}
+
+#time > span {
+  font-weight: bold;
+}
+
+/* Container for the two canvases */
+.canvas-container {
+  display: flex;
+  align-items: flex-start; /* Align tops of canvas boxes */
+  justify-content: space-around; /* Distributes space */
+  flex-wrap: wrap; /* Allows wrapping */
+  width: 100%;
+  margin-top: 20px;
+}
+
+.canvas-box {
+  flex: 1; /* Each box tries to take equal space */
+  min-width: 300px; /* Minimum width before wrapping */
+  max-width: 550px; /* Max width to prevent excessive size */
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#inputCanvas,
+#outputCanvas {
+  border: 1px solid #aaa;
+  display: block; /* Remove extra space below canvas */
+  max-width: 100%; /* Ensure canvas scales down */
+  height: auto; /* Maintain aspect ratio */
+  background-color: #f0f0f0; /* Placeholder background */
+}
+
+#inputDimensions, #outputDimensions {
+    text-align: center;
+    margin-top: 5px;
+    font-size: 0.9em;
+    color: #333;
+    min-height: 1.1em; /* Prevent layout shift */
+}
+
+.actions {
+  display: flex;
+  justify-content: center; /* Center the clear button */
+  margin-top: 20px;
+  width: 100%;
+}

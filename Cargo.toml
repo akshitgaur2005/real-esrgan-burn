@@ -3,19 +3,27 @@ name = "real_esrgan"
 version = "0.1.0"
 edition = "2024"
 
-[features]
-default = []
-half_precision = []
+[lib]
+crate-type = [ "cdylib" ]
+
 
 [dependencies]
 model = { path = "./model" }
 anyhow = "1.0.97"
 image = { version = "0.25.6", features = ["jpeg", "png"] }
-burn = { git = "https://github.com/tracel-ai/burn", branch = "main", features = ["vision", "wgpu", "ndarray", "cuda", "tch", "vulkan"] }
-burn-import = { git = "https://github.com/tracel-ai/burn", branch = "main" }
-burn-ndarray = { git = "https://github.com/tracel-ai/burn", branch = "main" }
+wasm-bindgen = "0.2.100"
+wasm-bindgen-futures = "0.4.50"
+wasm-logger = "0.2.0"
+serde = "1.0.219"
+js-sys = "0.3.77"
+console_error_panic_hook = "0.1.7"
+log = "0.4.27"
+web-time = "1.1.0"
+burn = { git = "https://github.com/tracel-ai/burn", branch = "main", default-features = false, features = ["ndarray", "wgpu"] }
+burn-import = { git = "https://github.com/tracel-ai/burn", branch = "main", default-features = false }
+getrandom = { version = "0.3.2", default-features = false, features = ["wasm_js"] }
 
 [build-dependencies]
 model = { path = "./model" }
-burn = { git = "https://github.com/tracel-ai/burn", branch = "main", features = ["vision", "wgpu", "ndarray", "tch", "vulkan"] }
-burn-import = { git = "https://github.com/tracel-ai/burn", branch = "main" }
+burn = { git = "https://github.com/tracel-ai/burn", branch = "main", default-features = false, features = ["ndarray", "wgpu"] }
+burn-import = { git = "https://github.com/tracel-ai/burn", branch = "main", default-features = false }

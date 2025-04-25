@@ -8,10 +8,7 @@ use model::{RealESRGAN, RealESRGANConfig};
 use core::convert::Into;
 
 use burn::{
-    backend::{wgpu::init_setup_async, NdArray},
-    prelude::*,
-    tensor::{activation::softmax, f16},
-    record::{FullPrecisionSettings, Recorder, NamedMpkFileRecorder}
+    backend::{wgpu::init_setup_async, NdArray}, prelude::*, record::{BinBytesRecorder, FullPrecisionSettings, NamedMpkFileRecorder, Recorder}, tensor::{activation::softmax, f16}
 };
 
 use burn::backend::wgpu::{WgpuDevice, Wgpu, graphics::AutoGraphicsApi};
@@ -19,6 +16,9 @@ use burn::backend::wgpu::{WgpuDevice, Wgpu, graphics::AutoGraphicsApi};
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
 use web_time::Instant;
+
+
+static STATE_ENCODED: &[u8] = include_bytes!("../x4.bin");
 
 #[wasm_bindgen(start)]
 pub fn start() {
@@ -104,7 +104,7 @@ impl Upscaler {
 
         log::debug!("Warming up the model");
         let start = Instant::now();
-        let _ = self.inference(&[0.0; 200 * 200 * 3], 200, 200, 2, 128, 1, 1).await;
+        let _ = self.inference(&[0.0; 20 * 20 * 3], 20, 20, 2, 128, 1, 1).await;
         let duration = start.elapsed();
         log::debug!("Warming up is completed in {:?}", duration);
         Ok(())
@@ -122,7 +122,7 @@ impl Upscaler {
 
         log::debug!("Warming up the model");
         let start = Instant::now();
-        let _ = self.inference(&[0.0; 200 * 200 * 3], 200, 200, 2, 128, 1, 1).await;
+        let _ = self.inference(&[0.0; 20 * 20 * 3], 20, 20, 2, 128, 1, 1).await;
         let duration = start.elapsed();
         log::debug!("Warming up is completed in {:?}", duration);
         Ok(())
@@ -137,8 +137,8 @@ pub struct Model<B: Backend> {
 impl<B: Backend> Model<B> {
     /// Constructor
     pub fn new(device: &B::Device) -> Self {
-        let record = NamedMpkFileRecorder::<FullPrecisionSettings>::default()
-            .load("./x4.model".into(), device)
+        let record = BinBytesRecorder::<FullPrecisionSettings, &'static [u8]>::default()
+            .load(STATE_ENCODED, device)
             .expect("Failed to decode state");
         Self {
             model: RealESRGANConfig::new(3, 3, 4, 64, 23, 32)
@@ -156,13 +156,16 @@ impl<B: Backend> Model<B> {
         // Run the tensor input through the model
         let output = self.model.predict(input, batch_size, patch_size, padding, pad_size, &self.model.devices()[0]);
 
+        println!("Before data");
         let data = output
             .clamp(0.0, 255.0)
-            .into_data()
+            .into_data_async()
+            .await
             .convert::<f32>()
             .into_vec()
-            .unwrap();
+            .expect("Failed at data async");
 
+        println!("After data");
         data
     }
 }

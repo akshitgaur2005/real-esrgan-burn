@@ -21,9 +21,9 @@ const outputDimensionsDiv = $("outputDimensions");
 const SCALE_FACTOR = 4; // RealESRGAN x4 model
 // These might need tuning based on the model and device capabilities
 const BATCH_SIZE = 1;
-const PATCH_SIZE = 128; // Common patch size, adjust if needed
+const PATCH_SIZE = 64; // Common patch size, adjust if needed
 const PADDING = 10;     // Padding around patches
-const PAD_SIZE = 10;    // Seems related to padding, check model specifics
+const PAD_SIZE = 2;    // Seems related to padding, check model specifics
 
 // Module level variables
 let upscaler;
@@ -172,6 +172,7 @@ async function loadImage(src) {
   } finally {
       isProcessing = false;
   }
+      isProcessing = false;
 }
 
 /**
@@ -195,11 +196,14 @@ function extractPlanarRGB(canvas, ctx, width, height) {
 
 
 async function runInference() {
-    if (!upscaler || !currentImageData || isProcessing) {
-        console.warn("Inference pre-conditions not met (upscaler ready? image loaded? not processing?).");
+    if (!upscaler) {
+        console.warn("Inference pre-conditions not met (upscaler not ready).");
         return;
     }
-
+    if (!currentImageData) {
+        console.warn("Inference pre-conditions not met (image not loaded).");
+        return;
+    }
     isProcessing = true;
     statusDiv.textContent = `Upscaling ${currentImageName}...`;
     outputCtx.clearRect(0, 0, outputCanvas.width, outputCanvas.height); // Clear previous output

@@ -75,7 +75,7 @@ impl Upscaler {
 
         let output: Vec<u8> = result
             .into_iter()
-            .map(|p| p as u8)
+            .map(|p| p.clamp(0.0, 255.0) as u8)
             .collect();
 
         Ok(output)
@@ -158,10 +158,10 @@ impl<B: Backend> Model<B> {
 
         println!("Before data");
         let data = output
-            .clamp(0.0, 255.0)
+        //    .clamp(0.0, 255.0)
             .into_data_async()
             .await
-            .convert::<f32>()
+        //    .convert::<f32>()
             .into_vec()
             .expect("Failed at data async");
 

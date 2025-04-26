@@ -1,0 +1,13 @@
+{
+  "name": "real_esrgan",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "real_esrgan_bg.wasm",
+    "real_esrgan.js"
+  ],
+  "main": "real_esrgan.js",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

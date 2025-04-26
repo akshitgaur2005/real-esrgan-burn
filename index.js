@@ -20,10 +20,10 @@ const outputDimensionsDiv = $("outputDimensions");
 // --- Configuration ---
 const SCALE_FACTOR = 4; // RealESRGAN x4 model
 // These might need tuning based on the model and device capabilities
-const BATCH_SIZE = 1;
-const PATCH_SIZE = 64; // Common patch size, adjust if needed
-const PADDING = 10;     // Padding around patches
-const PAD_SIZE = 2;    // Seems related to padding, check model specifics
+const BATCH_SIZE = 4;
+const PATCH_SIZE = 128; // Common patch size, adjust if needed
+const PADDING = 24;     // Padding around patches
+const PAD_SIZE = 8;    // Seems related to padding, check model specifics
 
 // Module level variables
 let upscaler;
